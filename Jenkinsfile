@@ -19,5 +19,33 @@ pipeline {
                 '''
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t home-web:latest .'
+            }
+        }
+
+        stage('Deploy Website') {
+            steps {
+                sh '''
+                    docker stop home-web || true
+                    docker rm home-web || true
+                    docker run -d \
+                        --name home-web \
+                        --restart unless-stopped \
+                        -p 8081:80 \
+                        home-web:latest
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh 'docker ps --filter name=home-web'
+                echo 'Website deployment completed.'
+            }
+        }
     }
 }
+
