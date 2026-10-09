@@ -2,27 +2,707 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>My Home Server</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b1020">
+
+    <title>HomeLab | Personal Server Dashboard</title>
+
+    <meta name="description"
+          content="A personal home lab powered by Ubuntu Server, Docker, and Jenkins. Built, hosted, and managed independently.">
+
+    <style>
+        :root {
+            --bg: #080d19;
+            --panel: rgba(18, 27, 48, 0.78);
+            --border: rgba(148, 163, 184, 0.17);
+            --text: #f1f5f9;
+            --muted: #9ba9c1;
+            --blue: #60a5fa;
+            --cyan: #67e8f9;
+            --green: #4ade80;
+            --purple: #c4b5fd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text);
+            background:
+                radial-gradient(ellipse at 15% 5%, #152b51 0, transparent 38%),
+                radial-gradient(ellipse at 90% 25%, #25204c 0, transparent 32%),
+                var(--bg);
+            font-family: Inter, "Segoe UI", system-ui, sans-serif;
+            line-height: 1.6;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .container {
+            width: min(1120px, 92%);
+            margin: auto;
+        }
+
+        /* Navigation */
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1rem;
+            font-weight: 750;
+            letter-spacing: -0.4px;
+        }
+
+        .brand-icon {
+            display: grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            color: var(--cyan);
+            background: rgba(103, 232, 249, 0.1);
+            border: 1px solid rgba(103, 232, 249, 0.22);
+            font-size: 1.3rem;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        .live-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 12px rgba(74, 222, 128, 0.7);
+        }
+
+        /* Hero */
+
+        .hero {
+            padding: 85px 0 55px;
+            max-width: 850px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            margin-bottom: 22px;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            border-radius: 100px;
+            background: rgba(96, 165, 250, 0.08);
+            color: var(--cyan);
+            font-size: 0.8rem;
+            font-weight: 650;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            max-width: 800px;
+            font-size: clamp(2.7rem, 7vw, 5.2rem);
+            line-height: 1.06;
+            letter-spacing: -3px;
+        }
+
+        .gradient-text {
+            color: var(--blue);
+            background: linear-gradient(100deg, #60a5fa, #67e8f9, #c4b5fd);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 650px;
+            margin-top: 24px;
+            color: var(--muted);
+            font-size: 1.08rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 13px;
+            margin-top: 30px;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            min-height: 46px;
+            padding: 12px 19px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 650;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            border-color: var(--blue);
+        }
+
+        .button-primary {
+            color: #08111f;
+            background: linear-gradient(100deg, #60a5fa, #67e8f9);
+            border-color: transparent;
+        }
+
+        /* Cards */
+
+        .section {
+            padding: 35px 0;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 22px;
+        }
+
+        .section-heading h2 {
+            font-size: 1.45rem;
+            letter-spacing: -0.6px;
+        }
+
+        .section-heading p {
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            min-width: 0;
+            padding: 24px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            backdrop-filter: blur(16px);
+            transition: transform 0.25s, border-color 0.25s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(96, 165, 250, 0.5);
+        }
+
+        .card-icon {
+            display: grid;
+            place-items: center;
+            width: 48px;
+            height: 48px;
+            margin-bottom: 20px;
+            border-radius: 14px;
+            background: rgba(96, 165, 250, 0.1);
+            font-size: 1.4rem;
+        }
+
+        .card h3 {
+            margin-bottom: 8px;
+            font-size: 1.08rem;
+        }
+
+        .card p {
+            color: var(--muted);
+            font-size: 0.91rem;
+        }
+
+        .tag {
+            display: inline-block;
+            margin-top: 18px;
+            padding: 5px 9px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #cbd5e1;
+            font-size: 0.75rem;
+        }
+
+        /* Server information */
+
+        .server-panel {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 30px;
+            padding: 30px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: linear-gradient(
+                120deg,
+                rgba(21, 39, 68, 0.85),
+                rgba(20, 22, 43, 0.85)
+            );
+        }
+
+        .server-panel h3 {
+            margin-bottom: 10px;
+            font-size: 1.25rem;
+        }
+
+        .server-panel p {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .server-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 18px;
+            color: var(--green);
+            font-size: 0.85rem;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .detail {
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: rgba(8, 13, 25, 0.35);
+        }
+
+        .detail span {
+            display: block;
+            color: var(--muted);
+            font-size: 0.76rem;
+        }
+
+        .detail strong {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.94rem;
+        }
+
+        /* Workflow */
+
+        .workflow {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .step {
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: rgba(18, 27, 48, 0.58);
+        }
+
+        .step-number {
+            color: var(--cyan);
+            font-size: 0.78rem;
+            font-weight: 750;
+            letter-spacing: 1px;
+        }
+
+        .step h3 {
+            margin: 10px 0 5px;
+            font-size: 0.97rem;
+        }
+
+        .step p {
+            color: var(--muted);
+            font-size: 0.84rem;
+        }
+
+        /* Footer */
+
+        footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 55px;
+            padding: 25px 0 35px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        footer strong {
+            color: var(--text);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease both;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 800px) {
+            .grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .workflow {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .server-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding-top: 65px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            h1 {
+                letter-spacing: -1.5px;
+            }
+
+            .grid,
+            .workflow {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-right .nav-label {
+                display: none;
+            }
+
+            .section-heading {
+                align-items: start;
+                flex-direction: column;
+            }
+
+            .card {
+                padding: 21px;
+            }
+
+            .server-panel {
+                padding: 22px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Hello from my Home Server!</h1>
-    <p>Hosted on my own Ubuntu server using Docker.</p>
+    <div class="container">
+
+        <nav>
+            <a class="brand" href="#" aria-label="HomeLab home">
+                <span class="brand-icon">⌘</span>
+                <span>HomeLab<span class="gradient-text">.</span></span>
+            </a>
+
+            <div class="nav-right">
+                <span>
+                    <span class="live-dot"></span>
+                    <span class="nav-label">Self-hosted environment</span>
+                </span>
+                <span id="clock">Loading time...</span>
+            </div>
+        </nav>
+
+        <main>
+            <section class="hero fade-in">
+                <div class="eyebrow">
+                    <span>✦</span>
+                    My Personal Infrastructure
+                </div>
+
+                <h1>
+                    My own server.<br>
+                    <span class="gradient-text">My own cloud.</span>
+                </h1>
+
+                <p>
+                    Welcome to my personal home lab — a self-hosted environment
+                    built on Ubuntu Server and Docker. This project is where I
+                    experiment with Linux administration, containerization,
+                    automation, networking, and modern DevOps practices.
+                </p>
+
+                <div class="hero-actions">
+                    <a class="button button-primary" href="#infrastructure">
+                        Explore Infrastructure <span>↘</span>
+                    </a>
+                    <a class="button" href="#pipeline">
+                        View CI/CD Workflow <span>→</span>
+                    </a>
+                </div>
+            </section>
+
+            <section class="section" id="infrastructure">
+                <div class="section-heading">
+                    <div>
+                        <h2>Infrastructure & Technology</h2>
+                        <p>The building blocks behind this home lab.</p>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <article class="card">
+                        <div class="card-icon">🐧</div>
+                        <h3>Ubuntu Server</h3>
+                        <p>
+                            A Linux-based server environment used to host
+                            services, manage system resources, and practise
+                            command-line administration.
+                        </p>
+                        <span class="tag">Operating System</span>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-icon">🐳</div>
+                        <h3>Docker</h3>
+                        <p>
+                            Packages the website and its dependencies into a
+                            container for consistent deployment and easier
+                            application management.
+                        </p>
+                        <span class="tag">Containerization</span>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-icon">⚙️</div>
+                        <h3>Jenkins CI/CD</h3>
+                        <p>
+                            Automates the build and deployment workflow after
+                            changes are pushed to the project's GitHub
+                            repository.
+                        </p>
+                        <span class="tag">Automation</span>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-icon">🌐</div>
+                        <h3>Git & GitHub</h3>
+                        <p>
+                            Tracks source-code changes and stores the project
+                            repository, making collaboration and version
+                            history possible.
+                        </p>
+                        <span class="tag">Version Control</span>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-icon">🔐</div>
+                        <h3>Tailscale VPN</h3>
+                        <p>
+                            Provides private network access to the home server
+                            from authorized devices, including when working
+                            away from home.
+                        </p>
+                        <span class="tag">Private Networking</span>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-icon">🚀</div>
+                        <h3>Automated Deployment</h3>
+                        <p>
+                            Uses a Jenkins pipeline to validate the project,
+                            build a Docker image, replace the running website,
+                            and verify the deployment.
+                        </p>
+                        <span class="tag">DevOps Workflow</span>
+                    </article>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="server-panel">
+                    <div>
+                        <h3>Built to run independently.</h3>
+                        <p>
+                            The website runs on my own Ubuntu machine using
+                            Docker. Source code is maintained in GitHub, while
+                            Jenkins handles the deployment workflow. Private
+                            remote access is provided through Tailscale.
+                        </p>
+
+                        <div class="server-status">
+                            <span class="live-dot"></span>
+                            Website dashboard loaded successfully
+                        </div>
+                    </div>
+
+                    <div class="details">
+                        <div class="detail">
+                            <span>Platform</span>
+                            <strong>Ubuntu Server</strong>
+                        </div>
+
+                        <div class="detail">
+                            <span>Application</span>
+                            <strong>Docker Container</strong>
+                        </div>
+
+                        <div class="detail">
+                            <span>Deployment</span>
+                            <strong>Jenkins Pipeline</strong>
+                        </div>
+
+                        <div class="detail">
+                            <span>Remote Access</span>
+                            <strong>Tailscale VPN</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="pipeline">
+                <div class="section-heading">
+                    <div>
+                        <h2>My CI/CD Pipeline</h2>
+                        <p>From a code change to a running website.</p>
+                    </div>
+                </div>
+
+                <div class="workflow">
+                    <article class="step">
+                        <span class="step-number">STEP 01</span>
+                        <h3>Code & Commit</h3>
+                        <p>Make website changes and commit them with Git.</p>
+                    </article>
+
+                    <article class="step">
+                        <span class="step-number">STEP 02</span>
+                        <h3>Push to GitHub</h3>
+                        <p>Upload the latest source code to the repository.</p>
+                    </article>
+
+                    <article class="step">
+                        <span class="step-number">STEP 03</span>
+                        <h3>Build & Deploy</h3>
+                        <p>Jenkins builds the Docker image and replaces the container.</p>
+                    </article>
+
+                    <article class="step">
+                        <span class="step-number">STEP 04</span>
+                        <h3>Verify</h3>
+                        <p>Check that the deployed website responds successfully.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="section-heading">
+                    <div>
+                        <h2>What's Next?</h2>
+                        <p>Ideas for expanding the home lab.</p>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <article class="card">
+                        <div class="card-icon">📊</div>
+                        <h3>Monitoring & Observability</h3>
+                        <p>
+                            Add metrics, dashboards, and alerts to understand
+                            server health and application performance.
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-icon">☸️</div>
+                        <h3>Kubernetes</h3>
+                        <p>
+                            Explore container orchestration, service
+                            discovery, scaling, and workload management.
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-icon">🛡️</div>
+                        <h3>Security & Backups</h3>
+                        <p>
+                            Strengthen access controls, keep software updated,
+                            and plan reliable backups for important data.
+                        </p>
+                    </article>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Built and self-hosted with <strong>curiosity & code.</strong></p>
+            <p>HomeLab © <span id="year"></span> · Personal DevOps Project</p>
+        </footer>
+
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+
+            document.getElementById("clock").textContent =
+                now.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit"
+                });
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        document.getElementById("year").textContent =
+            new Date().getFullYear();
+    </script>
 </body>
 </html>
-
-<!-- automatic trigger test -->
-
-<!-- automatic trigger test -->
-
-<!-- polling test -->
-
-<!-- polling test -->
-
-<!-- polling test -->
-
-<!-- polling test -->
-
-<!-- polling test -->
-
-<!-- polling test -->
